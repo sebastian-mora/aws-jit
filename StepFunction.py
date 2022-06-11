@@ -8,20 +8,21 @@ class StepFunction():
         self.sqs = boto3.resource('sqs')
         self.queue = self.sqs.Queue('https://sqs.us-west-2.amazonaws.com/722461077209/jit-requests')  
  
-    def send_success(self, approver_name, task_token):
+    def send_success(self, approver_name, requestor_arn, task_token):
 
         response = self.client.send_task_success(
             taskToken=task_token,
             output=json.dumps(
                 {
                     "approved": True, 
-                    "approver_name": approver_name
+                    "approver_name": approver_name,
+                    "requestor_arn":requestor_arn
                 }
             )
         )
         return response
 
-    def send_failure(self, approver_name, task_token):
+    def send_failure(self, approver_name, requestor_arn, task_token):
  
 
         response = self.client.send_task_success(
@@ -29,7 +30,8 @@ class StepFunction():
             output=json.dumps(
                 {
                     "approved": False, 
-                    "approver_name": approver_name
+                    "approver_name": approver_name,
+                    "requestor_arn":requestor_arn
                 }
             )
         )
@@ -53,18 +55,20 @@ class StepFunction():
 
 
 
-# _instance = StepFunction()
-# message = _instance.get_message(queue)
+_instance = StepFunction()
+message = _instance.get_message()
 
-# if message:
-#     body = json.loads(message.body)
-#     print(body)
-#     token = body['TaskToken']
+if message:
+    body = json.loads(message.body)
+    print(body)
+    token = body['TaskToken']
 
-#     _instance.send_success("TESTER!", token )
-#     print("Sent token")
+    _instance.send_success("TESTER!", body['requestor_arn'], token )
+    print("Sent token")
 
-#     message.delete()
+    message.delete()
 
  
- 
+# {
+#     "requestor_arn": "arn:aws:iam::722461077209:role/service-role/jit-modify-iam-role-yki9u4ka"
+# }
