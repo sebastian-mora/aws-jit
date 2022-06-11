@@ -6,15 +6,15 @@ import StepFunction
 import json
 from time import sleep
 import threading
+from os import getenv
 
-SLACK_BOT_TOKEN='xoxb-3111338106947-3104683317958-wDsem6o2PTUcPdvjfBOm3eQG'
-SLACK_APP_TOKEN='xapp-1-A0332L27J9L-3656895056292-8e7daf71d513b6e105e87f04efc716dd19022512d40d50f290cc377736d20cc3'
-SIGNING_SECRET='2276616d30de2060f94ddf561ab67b34'
+from dotenv import load_dotenv
+load_dotenv() 
 
 step_func_client = StepFunction.StepFunction()
 
 # Initializes your app with your bot token and socket mode handler
-app = App(token= SLACK_BOT_TOKEN)
+app = App(token= getenv('SLACK_BOT_TOKEN'))
 
 
 db = {}
@@ -178,6 +178,5 @@ def find_sqs_id_in_message(body):
 
 # Start your app
 if __name__ == "__main__":
-    x = threading.Thread(target=thread_poll_sqs, daemon=True)
-    x.start()
-    SocketModeHandler(app, SLACK_APP_TOKEN).start()
+    x = threading.Thread(target=thread_poll_sqs, daemon=True).start()
+    SocketModeHandler(app,getenv('SLACK_APP_TOKEN')).start()
