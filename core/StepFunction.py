@@ -8,7 +8,7 @@ class StepFunction():
         self.sqs = boto3.resource('sqs')
         self.queue = self.sqs.Queue('https://sqs.us-west-2.amazonaws.com/722461077209/jit-requests')  
  
-    def send_success(self, approver_name, requestor_arn, task_token):
+    def send_success(self, approver_name, requester_arn, task_token):
 
         response = self.client.send_task_success(
             taskToken=task_token,
@@ -16,13 +16,13 @@ class StepFunction():
                 {
                     "approved": True, 
                     "approver_name": approver_name,
-                    "requestor_arn":requestor_arn
+                    "requester_arn":requester_arn
                 }
             )
         )
         return response
 
-    def send_failure(self, approver_name, requestor_arn, task_token):
+    def send_failure(self, approver_name, requester_arn, task_token):
  
 
         response = self.client.send_task_success(
@@ -31,7 +31,7 @@ class StepFunction():
                 {
                     "approved": False, 
                     "approver_name": approver_name,
-                    "requestor_arn":requestor_arn
+                    "requester_arn":requester_arn
                 }
             )
         )
@@ -63,12 +63,12 @@ if message:
     print(body)
     token = body['TaskToken']
 
-    _instance.send_success("TESTER!", body['requestor_arn'], token )
+    _instance.send_success("TESTER!", body['requester_arn'], token )
     print("Sent token")
 
     message.delete()
 
  
 # {
-#     "requestor_arn": "arn:aws:iam::722461077209:role/service-role/jit-modify-iam-role-yki9u4ka"
+#     "requester_arn": "arn:aws:iam::722461077209:role/service-role/jit-modify-iam-role-yki9u4ka"
 # }
