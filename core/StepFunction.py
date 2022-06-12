@@ -26,6 +26,7 @@ class StepFunction():
         self.client = boto3.client("stepfunctions")
         self.sqs = boto3.resource('sqs')
         self.sqs_url = getenv('SQS_URL')
+        self.state_machine_arn = getenv("STATE_MACHINE_ARN")
         self.queue = self.sqs.Queue(self.sqs_url) 
         self.logger = logger 
         
