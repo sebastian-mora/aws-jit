@@ -20,7 +20,7 @@ class Message():
     def __str__(self) -> str:
         return json.dumps(self.body)
 
-class StepFunction():
+class StepFunctionClient():
  
     def __init__(self, logger):
         self.client = boto3.client("stepfunctions")
