@@ -3,7 +3,7 @@ from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 
 
-from core.StepFunction import StepFunction
+from core.StepFunction import StepFunctionClient
 from integrations.slack.blocks.Approval import create_approval_message
 from integrations.slack.listener.JitaRequest import JitaRequest
 from integrations.slack.listener.jitaApproval import JitaApproval
@@ -23,7 +23,7 @@ class SlackBot:
     def __init__(self) -> None:
         self.app = App(token= getenv('SLACK_BOT_TOKEN'))
         self.logger = self._configure_logger()
-        self.stf_client = StepFunction(self.logger)
+        self.stf_client = StepFunctionClient(self.logger)
         self.received_messages = {}
        
        

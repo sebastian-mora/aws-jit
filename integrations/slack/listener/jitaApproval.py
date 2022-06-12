@@ -3,7 +3,7 @@ from blinker import receiver_connected
 from integrations.slack.listener.Listener import SlackListener
 
 
-from core.StepFunction import StepFunction, Message
+from core.StepFunction import StepFunctionClient, Message
 
 import json
 
@@ -12,7 +12,7 @@ class JitaApproval(SlackListener):
     
     def __init__(self, app,received_messages, logger ):
         super().__init__(app, logger)
-        self.sfn_client = StepFunction(self.logger)
+        self.sfn_client = StepFunctionClient(self.logger)
         self.received_messages = received_messages
   
     def register(self):

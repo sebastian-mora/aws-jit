@@ -3,14 +3,14 @@ from integrations.slack.listener.Listener import SlackListener
 from integrations.slack.blocks.RequestModal import REQUEST_VIEW
 from core.StepFunction import Message
 
-from core.StepFunction import StepFunction
+from core.StepFunction import StepFunctionClient
 
 
 class JitaRequest(SlackListener):
     
     def __init__(self, app, logger):
         super().__init__(app, logger)
-        self.sfn_client = StepFunction(self.logger)
+        self.sfn_client = StepFunctionClient(self.logger)
   
     def register(self):
         self.app.shortcut("admin_requested")(self.open_request_modal)
