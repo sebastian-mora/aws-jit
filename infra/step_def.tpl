@@ -6,7 +6,7 @@
       "Type": "Task",
       "Resource": "arn:aws:states:::sqs:sendMessage.waitForTaskToken",
       "Parameters": {
-        "QueueUrl": "https://sqs.us-west-2.amazonaws.com/722461077209/jit-requests",
+        "QueueUrl": "${queue_url}",
         "MessageBody": {
           "input.$": "$",
           "TaskToken.$": "$$.Task.Token"
@@ -36,7 +36,7 @@
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke",
       "Parameters": {
-        "FunctionName": "${lambda_function_arn}",
+        "FunctionName": "${lambda_function_arn}:$LATEST",
         "Payload": {
           "requester_arn.$": "$.requester_arn",
           "action": "append"
@@ -67,7 +67,7 @@
       "Resource": "arn:aws:states:::lambda:invoke",
       "OutputPath": "$.Payload",
       "Parameters": {
-        "FunctionName": "arn:aws:lambda:us-west-2:722461077209:function:jit-modify-iam:$LATEST",
+        "FunctionName": "${lambda_function_arn}:$LATEST",
         "Payload": {
           "requester_arn.$": "$.requester_arn",
           "action": "remove"
