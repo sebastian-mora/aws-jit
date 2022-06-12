@@ -1,6 +1,7 @@
 
 from integrations.slack.listener.Listener import SlackListener
 from integrations.slack.blocks.RequestModal import REQUEST_VIEW
+from core.StepFunction import Message
 
 from core.StepFunction import StepFunction
 
@@ -9,7 +10,7 @@ class JitaRequest(SlackListener):
     
     def __init__(self, app, logger):
         super().__init__(app, logger)
-        self.sfn_client = StepFunction()
+        self.sfn_client = StepFunction(self.logger)
   
     def register(self):
         self.app.shortcut("admin_requested")(self.open_request_modal)
@@ -27,6 +28,16 @@ class JitaRequest(SlackListener):
         
     def process_jita_request(self, ack, body, view):
         ack()
+
         requester_arn = view["state"]["values"]['requester_block']['requester_arn']['value']
-        self.sfn_client.start_execution({"requester_arn":requester_arn})
-        self.logger.info("Jita request received, starting step function.")
+        reason = view["state"]["values"]['reason_block']['reason']['value']
+        requester_name = body['user']['username']
+
+        message = Message({
+            "requester_arn": requester_arn,
+            "reason":  reason,
+            "requester_name": requester_name
+        })
+
+        self.sfn_client.start_execution(message)
+        self.logger.info(f"JITA Request {message}")
