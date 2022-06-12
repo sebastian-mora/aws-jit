@@ -18,7 +18,7 @@ data "aws_iam_policy_document" "lambda_assume_role" {
   statement {
     actions = ["sts:AssumeRole"]
     principals {
-      type        = "Service"
+      type        = "AWS"
       identifiers = [ "lambda.amazonaws.com" ]
     }
   }
@@ -50,7 +50,7 @@ data "aws_iam_policy_document" "jita_admin_assume_role" {
     actions = ["sts:AssumeRole"]
     principals {
       type        = "AWS"
-      identifiers = [ "arn:aws:iam::722461077209:role/aws-jit-dev-us-west-2-lambdaRole" ]
+      identifiers = [ "" ]
     }
     condition {
       test = "StringLike"
@@ -60,8 +60,3 @@ data "aws_iam_policy_document" "jita_admin_assume_role" {
     }
   }
 }
-
-# resource "aws_iam_role_policy_attachment" "jita_admin_attach" {
-#   name = aws_iam_role.jita_admin.name
-#   policy_arn = 
-# }
