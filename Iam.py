@@ -36,7 +36,7 @@ def remove_role_trust_policy(role_name, arn):
 
 def lambda_handler(event, context):
 
-    requestor_arn = event.get('requestor_arn')
+    requester_arn = event.get('requester_arn')
 
-    response = {'result': requestor_arn}
+    response = {'result': requester_arn}
     return response
