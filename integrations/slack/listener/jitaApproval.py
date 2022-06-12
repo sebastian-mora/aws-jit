@@ -20,8 +20,6 @@ class JitaApproval(SlackListener):
         self.app.action("request_denied")(self.deny_request)
         self.logger.debug("Registered Jita Approval listeners")
         
-
-
     def approve_request(self, ack, body):
         ack()
         self.logger.info("Request Approved by XXX")
@@ -50,8 +48,7 @@ class JitaApproval(SlackListener):
 
         message = Message({
             "approver_name": approver_name,
-            "requester_arn": sqs_body['input']['requester_arn'],
-            "TaskToken": sqs_body['TaskToken']
+            "requester_arn": sqs_body['input']['requester_arn']
         })
 
         self.sfn_client.send_failure(message, sqs_body['TaskToken'])

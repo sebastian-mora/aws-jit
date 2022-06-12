@@ -26,6 +26,7 @@ class StepFunction():
         self.client = boto3.client("stepfunctions")
         self.sqs = boto3.resource('sqs')
         self.sqs_url = getenv('SQS_URL')
+        self.state_machine_arn = getenv("STATE_MACHINE_ARN")
         self.queue = self.sqs.Queue(self.sqs_url) 
         self.logger = logger 
         
@@ -52,7 +53,7 @@ class StepFunction():
     
     def start_execution(self, message: Message) -> object:
         response = self.client.start_execution(
-            stateMachineArn='arn:aws:states:us-west-2:722461077209:stateMachine:jit',
+            stateMachineArn=self.state_machine_arn,
             input=message.json(),
         )
 
@@ -65,9 +66,3 @@ class StepFunction():
 
         if len(messages) >= 1: # If there are messages return the first
             return messages[0]
-    
-
- 
-# {
-#     "requester_arn": "arn:aws:iam::722461077209:role/service-role/jit-modify-iam-role-yki9u4ka"
-# }
