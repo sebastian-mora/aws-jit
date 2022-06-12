@@ -8,7 +8,7 @@ data "aws_iam_policy_document" "lambda_modifiy_jita_admin_role" {
     ]
 
     resources = [
-      "arn:aws:s3:::*",
+      "arn:aws:s3:::*"
     ]
   }
 
