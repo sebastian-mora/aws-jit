@@ -3,8 +3,7 @@
 data "template_file" "step_def"{
     template = file("${path.module}/step_def.tpl")
     vars = {
-      "lambda_function_arn" = module.jita_modifiy_iam.lambda_function_arn,
-      "queue_url" = aws_sqs_queue.jita_queue.url
+      "lambda_function_arn" = module.jita_modifiy_iam.lambda_function_arn
     }
 }
 

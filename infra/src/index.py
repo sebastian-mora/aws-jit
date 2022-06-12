@@ -1,11 +1,9 @@
 
 import boto3
 import json
-from os import getenv
 
 iam = boto3.client('iam')
 
-ADMIN_ROLE_NAME = getenv("ADMIN_ROLE_NAME")
 
 def append_trust_policy(role_name, arn):
   response = iam.get_role(RoleName=role_name)
@@ -32,10 +30,10 @@ def lambda_handler(event, context):
     action = event.get('action')
     
     if action == 'append':
-      append_trust_policy(ADMIN_ROLE_NAME, requester_arn)
+      append_trust_policy('jit-admin', requester_arn)
   
     if action == 'remove':
-      remove_role_trust_policy(ADMIN_ROLE_NAME, requester_arn)
+      remove_role_trust_policy('jit-admin', requester_arn)
       
     response = {'requester_arn': requester_arn, 'action': action}
     return response
