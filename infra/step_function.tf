@@ -15,6 +15,9 @@ module "step_function" {
     name       = "jita-requests"
     definition = data.template_file.step_def.rendered
 
+    attach_policy = true
+    policy = aws_iam_policy.step_function_execution.arn
+
     service_integrations = {
 
       sqs={

@@ -14,30 +14,11 @@ data "aws_iam_policy_document" "lambda_modifiy_jita_admin_role" {
 
 }
 
-data "aws_iam_policy_document" "lambda_assume_role" {
-  statement {
-    actions = ["sts:AssumeRole"]
-    principals {
-      type        = "Service"
-      identifiers = [ "lambda.amazonaws.com" ]
-    }
-  }
-}
 
 resource "aws_iam_policy" "lambda_modifiy_jita_admin_role" {
   name = "lambda_modifiy_jita_admin_role"
   description = "Allows modificaiton of jita-admin trust policy."
   policy = data.aws_iam_policy_document.lambda_modifiy_jita_admin_role.json
-}
-
-resource "aws_iam_role" "lambda_jita_modifiy_iam_role" {
-  name               = "lambda_jita_modifiy_iam"
-  assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
-}
-
-resource "aws_iam_role_policy_attachment" "attached_lambda_policy" {
-  role = aws_iam_role.lambda_jita_modifiy_iam_role.name
-  policy_arn = aws_iam_policy.lambda_modifiy_jita_admin_role.arn
 }
 
 resource "aws_iam_role" "jita_admin" {
@@ -61,7 +42,36 @@ data "aws_iam_policy_document" "jita_admin_assume_role" {
   }
 }
 
-# resource "aws_iam_role_policy_attachment" "jita_admin_attach" {
-#   name = aws_iam_role.jita_admin.name
-#   policy_arn = 
-# }
+
+data "aws_iam_policy_document" "step_function_trust_policy" {
+    statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = [ "states.amazonaws.com" ]
+    }
+  }
+}
+
+data "aws_iam_policy_document" "step_function_permissions" {
+  statement {
+    actions = [
+      "lambda:InvokeFunction",
+    ]
+
+    resources = [
+      format("%s:*", module.jita_modifiy_iam.lambda_function_arn)
+    ]
+  }
+
+  statement {
+    actions = ["sqs:SendMessage"]
+    resources = [ aws_sqs_queue.jita_request_queue.arn, aws_sqs_queue.jita_message_queue.arn  ]
+  }
+}
+
+resource "aws_iam_policy" "step_function_execution" {
+  name = "step_function_execution"
+  description = "Allows step fucntion to run."
+  policy = data.aws_iam_policy_document.step_function_permissions.json
+}

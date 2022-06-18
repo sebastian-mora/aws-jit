@@ -5,7 +5,8 @@ module "jita_modifiy_iam" {
   description   = "Modified jita role to allow user access"
   handler       = "index.lambda_handler"
   runtime       = "python3.9"
-  lambda_role = aws_iam_role.lambda_jita_modifiy_iam_role.arn
+  attach_policy = true
+  policy = aws_iam_policy.lambda_modifiy_jita_admin_role.arn
   source_path = "src/index.py"
 
   environment_variables = {
