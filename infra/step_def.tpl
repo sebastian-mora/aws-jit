@@ -6,7 +6,7 @@
       "Type": "Task",
       "Resource": "arn:aws:states:::sqs:sendMessage.waitForTaskToken",
       "Parameters": {
-        "QueueUrl": "${queue_url}",
+        "QueueUrl": "https://sqs.us-west-2.amazonaws.com/722461077209/jita-request-queue",
         "MessageBody": {
           "input.$": "$",
           "TaskToken.$": "$$.Task.Token"
@@ -36,7 +36,7 @@
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke",
       "Parameters": {
-        "FunctionName": "${lambda_function_arn}:$LATEST",
+        "FunctionName": "arn:aws:lambda:us-west-2:722461077209:function:jita_modifiy_iam:$LATEST",
         "Payload": {
           "requester_arn.$": "$.requester_arn",
           "action": "append"
@@ -53,9 +53,21 @@
           "MaxAttempts": 6,
           "BackoffRate": 2
         }
+        approver_name approver_name
       ],
-      "Next": "Wait",
+      "Next": "SQS Send Approval Message",
       "OutputPath": "$.Payload"
+    },
+    "SQS Send Approval Message": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sqs:sendMessage",
+      "Parameters": {
+        "MessageBody": {
+          "message.$": "States.Format('{} approved access for {}.', $.approver_name, $.requestor_arn )"
+        },
+        "QueueUrl": "https://sqs.us-west-2.amazonaws.com/722461077209/jita-message-queue"
+      },
+      "Next": "Wait"
     },
     "Wait": {
       "Type": "Wait",
@@ -67,7 +79,7 @@
       "Resource": "arn:aws:states:::lambda:invoke",
       "OutputPath": "$.Payload",
       "Parameters": {
-        "FunctionName": "${lambda_function_arn}:$LATEST",
+        "FunctionName": "arn:aws:lambda:us-west-2:722461077209:function:jita_modifiy_iam:$LATEST",
         "Payload": {
           "requester_arn.$": "$.requester_arn",
           "action": "remove"
