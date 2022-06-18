@@ -63,11 +63,12 @@
       "Resource": "arn:aws:states:::sqs:sendMessage",
       "Parameters": {
         "MessageBody": {
-          "message.$": "States.Format('{} approved access for {}.', $.approver_name, $.requestor_arn )"
+          "message.$": "States.Format('{} approved access for {}.', $.approver_name, $.requester_arn )"
         },
         "QueueUrl": "https://sqs.us-west-2.amazonaws.com/722461077209/jita-message-queue"
       },
-      "Next": "Wait"
+      "Next": "Wait",
+      "ResultPath": null
     },
     "Wait": {
       "Type": "Wait",
