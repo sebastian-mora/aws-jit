@@ -39,6 +39,7 @@
         "FunctionName": "arn:aws:lambda:us-west-2:722461077209:function:jita_modifiy_iam:$LATEST",
         "Payload": {
           "requester_arn.$": "$.requester_arn",
+          "approver_name.$": "$.approver_name",
           "action": "append"
         }
       },
@@ -53,7 +54,6 @@
           "MaxAttempts": 6,
           "BackoffRate": 2
         }
-        approver_name approver_name
       ],
       "Next": "SQS Send Approval Message",
       "OutputPath": "$.Payload"

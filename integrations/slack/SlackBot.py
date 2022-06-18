@@ -56,7 +56,6 @@ class SlackBot:
     def thread_poll_sqs(self):
         while True:
             message = self.stf_client.get_message()
-            self.logger.debug("Thread Run")
             if message and not self.received_messages.get(message.message_id) :
                 self.received_messages[message.message_id] = message
                 body = json.loads(message.body)

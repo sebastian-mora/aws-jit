@@ -42,4 +42,4 @@ def lambda_handler(event, context):
       remove_role_trust_policy(ADMIN_ROLE_NAME, requester_arn)
       
     response = {'requester_arn': requester_arn, 'action': action, 'approver_name': approve_name}, 
-    return responsea
+    return response
