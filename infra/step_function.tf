@@ -11,7 +11,12 @@ data "template_file" "step_def"{
 module "step_function" {
     source = "terraform-aws-modules/step-functions/aws"
     type = "STANDARD"
-    cloudwatch_log_group_name = "/aws/vendedlogs/states/jita-Logs"
+    cloudwatch_log_group_name = "/aws/vendedlogs/states/jita-logs"
+    cloudwatch_log_group_retention_in_days = 120
+    logging_configuration = {
+      "level" = "ALL"
+      "include_execution_data" = true
+    }
     name       = "jita-requests"
     definition = data.template_file.step_def.rendered
 
