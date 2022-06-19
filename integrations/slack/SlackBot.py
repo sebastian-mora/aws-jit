@@ -55,7 +55,7 @@ class SlackBot:
 
     def thread_poll_sqs(self):
         while True:
-            message = self.stf_client.get_request_message()
+            message = self.stf_client.get_request_messages()
             if message and not self.received_messages.get(message.message_id) :
                 self.received_messages[message.message_id] = message
                 body = json.loads(message.body)
@@ -67,7 +67,7 @@ class SlackBot:
                     text="Approval Required"
                 )
             
-            status_message = self.stf_client.get_status_message()
+            status_message = self.stf_client.get_status_messages()
             if status_message:
                 self.logger.info(f"Received Status update {status_message.message_id}")
                 body = json.loads(status_message.body)
