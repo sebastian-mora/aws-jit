@@ -70,7 +70,7 @@ class SlackBot:
                     )
             
             status_messages = self.stf_client.get_status_messages()
-            for status_message in status_message
+            for status_message in status_message:
                 self.logger.info(f"Received Status update {status_message.message_id}")
                 body = json.loads(status_message.body)
                 self.logger.debug(body)
