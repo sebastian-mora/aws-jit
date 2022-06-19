@@ -15,9 +15,9 @@
       "ResultSelector": {
         "approved.$": "$.approved",
         "approver_name.$": "$.approver_name",
+        "requester_name.$": "$.requester_name",
         "requester_arn.$": "$.requester_arn"
       },
-      "TimeoutSeconds": 3600,
       "HeartbeatSeconds": 3600,
       "Next": "Choice",
       "Catch": [
@@ -25,11 +25,12 @@
           "ErrorEquals": [
             "States.Timeout"
           ],
-          "Next": "Request Expired",
+          "Next": "Send Error Message",
           "Comment": "request timeout",
-          "ResultPath": "$.error.timeout"
+          "ResultPath": "$.error"
         }
-      ]
+      ],
+      "TimeoutSeconds": 3600
     },
     "Choice": {
       "Type": "Choice",
@@ -40,15 +41,15 @@
           "Next": "Add to Trust"
         }
       ],
-      "Default": "Request Expired"
+      "Default": "Send Error Message"
     },
-    "Request Expired": {
+    "Send Error Message": {
       "Type": "Task",
       "Resource": "arn:aws:states:::sqs:sendMessage",
       "Parameters": {
         "QueueUrl": "https://sqs.us-west-2.amazonaws.com/722461077209/jita-message-queue",
         "MessageBody": {
-          "message.$": "States.Format('Jita request expired for {}.', $.requester_name )"
+          "message.$": "States.Format('Error for request {}:  {}.', $.requester_name, $.error )"
         }
       },
       "Next": "Fail"
@@ -60,24 +61,23 @@
         "FunctionName": "arn:aws:lambda:us-west-2:722461077209:function:jita_modifiy_iam:$LATEST",
         "Payload": {
           "requester_arn.$": "$.requester_arn",
+          "requester_name.$": "$.requester_name",
           "approver_name.$": "$.approver_name",
           "action": "append"
         }
       },
-      "Retry": [
+      "Next": "Approval Message",
+      "OutputPath": "$.Payload",
+      "Catch": [
         {
           "ErrorEquals": [
-            "Lambda.ServiceException",
-            "Lambda.AWSLambdaException",
-            "Lambda.SdkClientException"
+            "MalformedPolicyDocumentException"
           ],
-          "IntervalSeconds": 2,
-          "MaxAttempts": 6,
-          "BackoffRate": 2
+          "Next": "Send Error Message",
+          "Comment": "Malformed Policy",
+          "ResultPath": "$.error"
         }
-      ],
-      "Next": "Approval Message",
-      "OutputPath": "$.Payload"
+      ]
     },
     "Approval Message": {
       "Type": "Task",
@@ -127,7 +127,7 @@
       "Parameters": {
         "QueueUrl": "https://sqs.us-west-2.amazonaws.com/722461077209/jita-message-queue",
         "MessageBody": {
-          "message.$": "States.Format('Access for {} has expired. Permissions revoked successfully.', $.requester_arn )"
+          "message.$": "States.Format('Access for {} has expired. Permissions revoked sucessfully.', $.requester_arn )"
         }
       },
       "Next": "Success"
