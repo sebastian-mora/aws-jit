@@ -19,69 +19,31 @@
         "requester_arn.$": "$.requester_arn"
       },
       "HeartbeatSeconds": 3600,
-      "Next": "Check if approved",
+      "Next": "Choice",
       "Catch": [
         {
           "ErrorEquals": [
             "States.Timeout"
           ],
-          "Next": "Error Messaging",
+          "Next": "Send Error Message",
           "Comment": "request timeout",
-          "ResultPath": "$.error.timeout"
+          "ResultPath": "$.error"
         }
       ],
       "TimeoutSeconds": 3600
     },
-    "Error Messaging": {
-      "Type": "Choice",
-      "Choices": [
-        {
-          "Variable": "$.error.timeout",
-          "IsPresent": true,
-          "Next": "Send Reject Expired Message"
-        },
-        {
-          "Variable": "$.error.malformed_policy",
-          "IsPresent": true,
-          "Next": "Send Malformed Policy Error"
-        },
-        {
-          "Variable": "$.approved",
-          "BooleanEquals": false,
-          "Next": "Send Reject Rejected",
-          "Comment": "Send Rejected Message"
-        }
-      ],
-      "Default": "Send generic stack trace error"
-    },
-    "Send Reject Expired Message": {
-      "Type": "Task",
-      "Resource": "arn:aws:states:::sqs:sendMessage",
-      "Parameters": {
-        "QueueUrl": "https://sqs.us-west-2.amazonaws.com/722461077209/jita-message-queue",
-        "MessageBody": {
-          "message.$": "States.Format('Error for request {} has expired.', $.requester_name)"
-        }
-      },
-      "End": true
-    },
-    "Check if approved": {
+    "Choice": {
       "Type": "Choice",
       "Choices": [
         {
           "Variable": "$.approved",
           "BooleanEquals": true,
-          "Next": "Add user to role trust"
-        },
-        {
-          "Variable": "$.approved",
-          "BooleanEquals": false,
-          "Next": "Error Messaging",
-          "Comment": "Request rejected"
+          "Next": "Add to Trust"
         }
-      ]
+      ],
+      "Default": "Send Error Message"
     },
-    "Send generic stack trace error": {
+    "Send Error Message": {
       "Type": "Task",
       "Resource": "arn:aws:states:::sqs:sendMessage",
       "Parameters": {
@@ -90,9 +52,9 @@
           "message.$": "States.Format('Error for request {}:  {}.', $.requester_name, $.error )"
         }
       },
-      "End": true
+      "Next": "Fail"
     },
-    "Add user to role trust": {
+    "Add to Trust": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke",
       "Parameters": {
@@ -111,9 +73,9 @@
           "ErrorEquals": [
             "MalformedPolicyDocumentException"
           ],
-          "Next": "Error Messaging",
+          "Next": "Send Error Message",
           "Comment": "Malformed Policy",
-          "ResultPath": "$.error.malformed_policy"
+          "ResultPath": "$.error"
         }
       ]
     },
@@ -126,15 +88,15 @@
         },
         "QueueUrl": "https://sqs.us-west-2.amazonaws.com/722461077209/jita-message-queue"
       },
-      "Next": "Grant access time",
+      "Next": "Wait",
       "ResultPath": null
     },
-    "Grant access time": {
+    "Wait": {
       "Type": "Wait",
       "Seconds": 360,
-      "Next": "Revoke user role access"
+      "Next": "Remove Trust"
     },
-    "Revoke user role access": {
+    "Remove Trust": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke",
       "OutputPath": "$.Payload",
@@ -173,27 +135,8 @@
     "Success": {
       "Type": "Succeed"
     },
-    "Send Malformed Policy Error": {
-      "Type": "Task",
-      "Resource": "arn:aws:states:::sqs:sendMessage",
-      "Parameters": {
-        "MessageBody": {
-          "message.$": "States.Format('Error for request {} has malformed resource policy. Verifiy requested ARN.', $.requester_name)"
-        },
-        "QueueUrl": "https://sqs.us-west-2.amazonaws.com/722461077209/jita-message-queue"
-      },
-      "End": true
-    },
-    "Send Reject Rejected": {
-      "Type": "Task",
-      "Resource": "arn:aws:states:::sqs:sendMessage",
-      "Parameters": {
-        "QueueUrl": "https://sqs.us-west-2.amazonaws.com/722461077209/jita-message-queue",
-        "MessageBody": {
-          "message.$": "States.Format('Request for {}  has been rejected by {}.', $.requester_name, $.approver_name )"
-        }
-      },
-      "End": true
+    "Fail": {
+      "Type": "Fail"
     }
   }
 }
