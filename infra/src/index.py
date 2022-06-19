@@ -35,12 +35,16 @@ def lambda_handler(event, context):
     requester_arn = event.get('requester_arn')
     action = event.get('action')
     approve_name = event.get('approver_name')
+
+    try:
+      if action == 'append':
+        append_trust_policy(ADMIN_ROLE_NAME, requester_arn)
+    except iam.exceptions.MalformedPolicyDocumentException as error:
+      raise(error)
     
-    if action == 'append':
-      append_trust_policy(ADMIN_ROLE_NAME, requester_arn)
-  
     if action == 'remove':
       remove_role_trust_policy(ADMIN_ROLE_NAME, requester_arn)
       
-    response = {'requester_arn': requester_arn, 'action': action, 'approvor_name': approve_name} 
+    response = {'requester_arn': requester_arn, 'action': action, 'approver_name': approve_name}
     return response
+    
