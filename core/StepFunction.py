@@ -66,20 +66,14 @@ class StepFunctionClient():
         messages = self.request_queue.receive_messages(MaxNumberOfMessages=1, WaitTimeSeconds=1)
 
         if len(messages) >= 1: # If there are messages return the first
-<<<<<<< HEAD
             return messages
         return []
-=======
-            return messages[0]
->>>>>>> parent of c71653b... fix return type
+
 
     def get_status_messages(self) -> object:
         messages = self.status_queue.receive_messages(MaxNumberOfMessages=1, WaitTimeSeconds=1)
         
         if len(messages) >= 1: # If there are messages return the first
-<<<<<<< HEAD
             return messages
         return []
-=======
-            return messages[0]
->>>>>>> parent of c71653b... fix return type
+
