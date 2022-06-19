@@ -66,10 +66,10 @@ class StepFunctionClient():
         messages = self.request_queue.receive_messages(MaxNumberOfMessages=1, WaitTimeSeconds=1)
 
         if len(messages) >= 1: # If there are messages return the first
-            return messages[0]
+            return messages
 
     def get_status_messages(self) -> object:
         messages = self.status_queue.receive_messages(MaxNumberOfMessages=1, WaitTimeSeconds=1)
         
         if len(messages) >= 1: # If there are messages return the first
-            return messages[0]
+            return messages
