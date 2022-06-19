@@ -1,10 +1,11 @@
 
 import boto3
+import botocore
+
 import json
 from os import getenv
 
 iam = boto3.client('iam')
-
 ADMIN_ROLE_NAME = getenv("ADMIN_ROLE_NAME")
 
 def append_trust_policy(role_name, arn):
@@ -16,7 +17,7 @@ def append_trust_policy(role_name, arn):
     trust_policy['Statement'][0]['Principal']['AWS'] = [trust_policy['Statement'][0]['Principal']['AWS'], arn]
   else:
     trust_policy['Statement'][0]['Principal']['AWS'].append(arn)
-
+  
   res = iam.update_assume_role_policy(RoleName=role_name, PolicyDocument=json.dumps(trust_policy))
 
 def remove_role_trust_policy(role_name, arn):
