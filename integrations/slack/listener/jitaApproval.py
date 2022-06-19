@@ -24,6 +24,7 @@ class JitaApproval(SlackListener):
         ack()
 
         approver_name = body['user']['username']
+        requester_name = body['user']['username']
 
 
         try:
@@ -34,10 +35,9 @@ class JitaApproval(SlackListener):
 
         sqs_body = json.loads(sqs_message.body)
 
-       
-
         message = Message({
             "approver_name": approver_name,
+            "requester_name": requester_name,
             "requester_arn": sqs_body['input']['requester_arn']
         })
 
@@ -50,12 +50,14 @@ class JitaApproval(SlackListener):
     def deny_request(self, ack, body):
         ack()
         approver_name = body['user']['username']
+        requester_name = body['user']['username']
         sqs_message = self.received_messages[self._find_sqs_recpt_handle_in_message(body)]
         sqs_body = json.loads(sqs_message.body)
 
         message = Message({
             "approver_name": approver_name,
-            "requester_arn": sqs_body['input']['requester_arn']
+            "requester_arn": sqs_body['input']['requester_arn'],
+            "requester_name": requester_name
         })
 
         self.sfn_client.send_failure(message, sqs_body['TaskToken'])
