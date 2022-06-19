@@ -4,7 +4,7 @@ terraform {
     organization = "ruse"
 
     workspaces {
-      name = "aws-jita"
+      name = "aws-jit"
     }
   }
 }
