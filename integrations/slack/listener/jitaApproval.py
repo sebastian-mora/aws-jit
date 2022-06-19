@@ -22,12 +22,19 @@ class JitaApproval(SlackListener):
         
     def approve_request(self, ack, body):
         ack()
-        self.logger.info("Request Approved by XXX")
-        sqs_message = self.received_messages[self._find_sqs_recpt_handle_in_message(body)]
+
+        approver_name = body['user']['username']
+
+
+        try:
+            sqs_message = self.received_messages[self._find_sqs_recpt_handle_in_message(body)]
+        except KeyError:
+            self.logger.info(f"{approver_name} tried approving request that was not in received list. Often caused by bot restart losing requests state.")
+            return
 
         sqs_body = json.loads(sqs_message.body)
 
-        approver_name = body['user']['username']
+       
 
         message = Message({
             "approver_name": approver_name,
@@ -59,5 +66,5 @@ class JitaApproval(SlackListener):
     
     def _find_sqs_recpt_handle_in_message(self, body):
         for block in body['message']['blocks']:
-            if block['type'] == 'context':
+            if block['block_id'] == 'sqs_id':
                 return block['elements'][0]['text']
