@@ -1,5 +1,5 @@
 output "sqs_url" {
-  value = aws_sqs_queue.jita_queue.url
+  value = aws_sqs_queue.jita_request_queue.url
 }
 
 output "step_function_arn" {

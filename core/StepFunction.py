@@ -25,9 +25,10 @@ class StepFunctionClient():
     def __init__(self, logger):
         self.client = boto3.client("stepfunctions")
         self.sqs = boto3.resource('sqs')
-        self.sqs_url = getenv('SQS_URL')
+
         self.state_machine_arn = getenv("STATE_MACHINE_ARN")
-        self.queue = self.sqs.Queue(self.sqs_url) 
+        self.request_queue = self.sqs.Queue(getenv('SQS_REQUEST_URL'))
+        self.status_queue = self.sqs.Queue(getenv('SQS_STATUS_URL'))
         self.logger = logger 
         
  
@@ -61,8 +62,14 @@ class StepFunctionClient():
 
         return response
 
-    def get_message(self) -> object:
-        messages = self.queue.receive_messages(MaxNumberOfMessages=1, WaitTimeSeconds=1)
+    def get_request_message(self) -> object:
+        messages = self.request_queue.receive_messages(MaxNumberOfMessages=1, WaitTimeSeconds=1)
 
+        if len(messages) >= 1: # If there are messages return the first
+            return messages[0]
+
+    def get_status_message(self) -> object:
+        messages = self.status_queue.receive_messages(MaxNumberOfMessages=1, WaitTimeSeconds=1)
+        
         if len(messages) >= 1: # If there are messages return the first
             return messages[0]
