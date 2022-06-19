@@ -19,7 +19,17 @@
       },
       "TimeoutSeconds": 3600,
       "HeartbeatSeconds": 3600,
-      "Next": "Choice"
+      "Next": "Choice",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.Timeout"
+          ],
+          "Next": "Request Expired",
+          "Comment": "request timeout",
+          "ResultPath": "$.error.timeout"
+        }
+      ]
     },
     "Choice": {
       "Type": "Choice",
@@ -30,7 +40,18 @@
           "Next": "Add to Trust"
         }
       ],
-      "Default": "Fail"
+      "Default": "Request Expired"
+    },
+    "Request Expired": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sqs:sendMessage",
+      "Parameters": {
+        "QueueUrl": "https://sqs.us-west-2.amazonaws.com/722461077209/jita-message-queue",
+        "MessageBody": {
+          "message.$": "States.Format('Jita request expired for {}.', $.requester_name )"
+        }
+      },
+      "Next": "Fail"
     },
     "Add to Trust": {
       "Type": "Task",
@@ -55,10 +76,10 @@
           "BackoffRate": 2
         }
       ],
-      "Next": "SQS Send Approval Message",
+      "Next": "Approval Message",
       "OutputPath": "$.Payload"
     },
-    "SQS Send Approval Message": {
+    "Approval Message": {
       "Type": "Task",
       "Resource": "arn:aws:states:::sqs:sendMessage",
       "Parameters": {
@@ -72,7 +93,7 @@
     },
     "Wait": {
       "Type": "Wait",
-      "Seconds": 60,
+      "Seconds": 360,
       "Next": "Remove Trust"
     },
     "Remove Trust": {
@@ -98,6 +119,17 @@
           "BackoffRate": 2
         }
       ],
+      "Next": "Send removed access message"
+    },
+    "Send removed access message": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sqs:sendMessage",
+      "Parameters": {
+        "QueueUrl": "https://sqs.us-west-2.amazonaws.com/722461077209/jita-message-queue",
+        "MessageBody": {
+          "message.$": "States.Format('Access for {} has expired. Permissions revoked successfully.', $.requester_arn )"
+        }
+      },
       "Next": "Success"
     },
     "Success": {
